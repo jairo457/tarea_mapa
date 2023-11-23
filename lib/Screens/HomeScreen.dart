@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:circular_menu/circular_menu.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -19,6 +20,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  ScrollController _controller = new ScrollController();
   Ubicacion ubi = Ubicacion();
   ApiWeather? apiWeather;
   double? tempi;
@@ -28,6 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Color cuart = Colors.white;
   String? lati;
   String? longi;
+  bool red = false;
 
   late Position
       posi; //= Position(longitude: 0, latitude: 0, timestamp: Date, accuracy: 0, altitude: 0, altitudeAccuracy: altitudeAccuracy, heading: heading, headingAccuracy: headingAccuracy, speed: speed, speedAccuracy: speedAccuracy);
@@ -35,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     apiWeather = ApiWeather();
+    //ubi.determinePosition();
   }
 
   void Coloreame(double tempo) {
@@ -62,235 +66,332 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
-  Widget createWeatherList(BuildContext context, AsyncSnapshot snapshot,
-      Color thcolor, Color thcolot) {
-    return Container(
-        height: 150,
-        child: ListView.separated(
-            separatorBuilder: (BuildContext context, int index) => Container(
-                  width: 5,
-                ),
-            padding: EdgeInsets.only(left: 10),
-            itemCount: snapshot.data!.length,
-            shrinkWrap: true,
-            scrollDirection: Axis.horizontal,
-            itemBuilder: (BuildContext context, int index) {
-              return WidgetWeatherDay(
-                  snapshot.data![index], context, thcolor, thcolot);
-            }));
-  }
-
   Widget build(BuildContext context) {
+    final circularMenu = CircularMenu(
+        alignment: Alignment.centerRight,
+        toggleButtonColor: Colors.amber,
+        items: [
+          CircularMenuItem(
+              icon: Icons.map,
+              onTap: () {
+                Navigator.pushNamed(context, '/map');
+              }),
+          CircularMenuItem(
+              icon: Icons.search,
+              onTap: () {
+                //callback
+              }),
+          CircularMenuItem(
+              icon: Icons.settings,
+              onTap: () {
+                //callback
+              }),
+          CircularMenuItem(
+              icon: Icons.star,
+              onTap: () {
+                //callback
+              }),
+          CircularMenuItem(
+              icon: Icons.pages,
+              onTap: () {
+                //callback
+              }),
+        ]);
+
+    Widget createWeatherList(BuildContext context, AsyncSnapshot snapshot,
+        Color thcolor, Color thcolot) {
+      return Container(
+          height: 150,
+          child: ListView.separated(
+              separatorBuilder: (BuildContext context, int index) => Container(
+                    width: 5,
+                  ),
+              padding: EdgeInsets.only(left: 10),
+              itemCount: snapshot.data!.length,
+              shrinkWrap: true,
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (BuildContext context, int index) {
+                return WidgetWeatherDay(
+                    snapshot.data![index], context, thcolor, thcolot);
+              }));
+    }
+
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 183, 205, 224),
-      body: ListView(children: [
-        StreamBuilder(
-            stream: ubi.Getposition(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                lati = snapshot.data!.latitude.toString();
-                longi = snapshot.data!.longitude.toString();
-                return FutureBuilder(
-                    future: apiWeather!.getWeather(
-                        snapshot.data!.latitude.toString(),
-                        snapshot.data!.longitude.toString()),
-                    builder:
-                        (context, AsyncSnapshot<List<WeatherModel>?> snapshot) {
-                      if (snapshot.hasData) {
-                        tempi =
-                            double.tryParse(snapshot.data![0].temp.toString());
-                        Coloreame(double.tryParse(
-                            snapshot.data![0].temp.toString())!);
-                        return Center(
-                          child: ListView(
-                            shrinkWrap: true,
-                            scrollDirection: Axis.vertical,
-                            children: [
-                              const SizedBox(
-                                height: 60,
-                              ),
-                              Center(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(15),
-                                    gradient: LinearGradientPainter(
-                                      colors: <Color>[
-                                        secund,
-                                        ter,
-                                      ],
-                                    ),
-                                    // color:
-                                    //   secund // Color.fromARGB(234, 249, 245, 245),
-                                  ),
-                                  padding: EdgeInsets.all(10.0),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
+        backgroundColor: Color.fromARGB(255, 183, 205, 224),
+        body: red
+            ? Stack(children: [
+                ListView(
+                    controller: _controller,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      StreamBuilder(
+                          stream: ubi.Getposition(),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              lati = snapshot.data!.latitude.toString();
+                              longi = snapshot.data!.longitude.toString();
+                              return FutureBuilder(
+                                  future: apiWeather!.getWeather(
+                                      snapshot.data!.latitude.toString(),
+                                      snapshot.data!.longitude.toString()),
+                                  builder: (context,
+                                      AsyncSnapshot<List<WeatherModel>?>
+                                          snapshot) {
+                                    if (snapshot.hasData) {
+                                      tempi = double.tryParse(
+                                          snapshot.data![0].temp.toString());
+                                      Coloreame(double.tryParse(
+                                          snapshot.data![0].temp.toString())!);
+                                      return Center(
+                                        child: ListView(
+                                          shrinkWrap: true,
                                           children: [
-                                            Icon(
-                                              color: primar,
-                                              Icons.thermostat,
-                                              size: 80,
+                                            const SizedBox(
+                                              height: 30,
                                             ),
-                                            Text(
-                                                style: TextStyle(fontSize: 40),
-                                                snapshot.data![0].temp
-                                                        .toString() +
-                                                    ' C°')
-                                          ])
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 40,
-                              ),
-                              Center(
-                                child: Container(
-                                    padding: EdgeInsets.all(10.0),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(15),
-                                      color: secund,
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        ColorFiltered(
-                                          colorFilter: ColorFilter.mode(
-                                              primar, BlendMode.modulate),
-                                          child: Image(
-                                              image: AssetImage('assets/' +
-                                                  snapshot.data![0].icon
-                                                      .toString() +
-                                                  '.png')),
+                                            Center(
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(15),
+                                                  gradient:
+                                                      LinearGradientPainter(
+                                                    colors: <Color>[
+                                                      secund,
+                                                      ter,
+                                                    ],
+                                                  ),
+                                                  // color:
+                                                  //   secund // Color.fromARGB(234, 249, 245, 245),
+                                                ),
+                                                padding: EdgeInsets.all(10.0),
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.center,
+                                                  children: [
+                                                    Row(
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          Icon(
+                                                            color: primar,
+                                                            Icons.thermostat,
+                                                            size: 80,
+                                                          ),
+                                                          Text(
+                                                              style: TextStyle(
+                                                                  fontSize: 40),
+                                                              snapshot.data![0]
+                                                                      .temp
+                                                                      .toString() +
+                                                                  ' C°'),
+                                                          //circularMenu,
+                                                        ])
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(
+                                              height: 40,
+                                            ),
+                                            Center(
+                                              child: Container(
+                                                  padding: EdgeInsets.all(10.0),
+                                                  decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            15),
+                                                    color: secund,
+                                                  ),
+                                                  child: Column(
+                                                    mainAxisSize:
+                                                        MainAxisSize.max,
+                                                    children: [
+                                                      ColorFiltered(
+                                                        colorFilter:
+                                                            ColorFilter.mode(
+                                                                primar,
+                                                                BlendMode
+                                                                    .modulate),
+                                                        child: Image(
+                                                            image: AssetImage(
+                                                                'assets/' +
+                                                                    snapshot
+                                                                        .data![
+                                                                            0]
+                                                                        .icon
+                                                                        .toString() +
+                                                                    '.png')),
+                                                      ),
+                                                      Text(
+                                                          style: TextStyle(
+                                                              fontSize: 35),
+                                                          snapshot.data![0]
+                                                              .description
+                                                              .toString()),
+                                                      Text(
+                                                          style: TextStyle(
+                                                              color: cuart,
+                                                              fontSize: 20),
+                                                          'Temperatura Maxima: '),
+                                                      Text(
+                                                          style: TextStyle(
+                                                              fontSize: 20),
+                                                          snapshot.data![0]
+                                                                  .temp_max
+                                                                  .toString() +
+                                                              'C°'),
+                                                      Text(
+                                                          style: TextStyle(
+                                                              color: cuart,
+                                                              fontSize: 20),
+                                                          'Temperatura Minima: '),
+                                                      Text(
+                                                          style: TextStyle(
+                                                              fontSize: 20),
+                                                          snapshot.data![0]
+                                                                  .temp_min
+                                                                  .toString() +
+                                                              'C°'),
+                                                      Text(
+                                                          style: TextStyle(
+                                                              color: cuart,
+                                                              fontSize: 20),
+                                                          'Humedad: '),
+                                                      Text(
+                                                          style: TextStyle(
+                                                              fontSize: 20),
+                                                          snapshot
+                                                              .data![0].humidity
+                                                              .toString()),
+                                                      Text(
+                                                          style: TextStyle(
+                                                              color: cuart,
+                                                              fontSize: 20),
+                                                          'Sensacion termica: '),
+                                                      Text(
+                                                          style: TextStyle(
+                                                              fontSize: 20),
+                                                          snapshot.data![0]
+                                                              .feels_like
+                                                              .toString()),
+                                                      const SizedBox(
+                                                        height: 10,
+                                                      ),
+                                                      FutureBuilder(
+                                                          future: apiWeather!
+                                                              .getAllWeather(
+                                                                  lati!,
+                                                                  longi!,
+                                                                  DateTime
+                                                                      .now()),
+                                                          initialData: [],
+                                                          builder: (context,
+                                                              snapshot) {
+                                                            if (snapshot
+                                                                .hasData) {
+                                                              return createWeatherList(
+                                                                  context,
+                                                                  snapshot,
+                                                                  primar,
+                                                                  secund); /*Container(
+                                                      height: 150,
+                                                      child: ListView.builder(
+                                                          itemCount: snapshot
+                                                              .data!.length,
+                                                          shrinkWrap: true,
+                                                          scrollDirection:
+                                                              Axis.horizontal,
+                                                          itemBuilder:
+                                                              (BuildContext
+                                                                      context,
+                                                                  int index) {
+                                                            return WidgetWeatherDay(
+                                                                snapshot
+                                                                    .data![index],
+                                                                context);
+                                                          }));*/
+                                                            } else {
+                                                              if (snapshot
+                                                                  .hasError) {
+                                                                return Center(
+                                                                  child: Text(
+                                                                      'Error 3'),
+                                                                );
+                                                              } else {
+                                                                return Center(
+                                                                  child:
+                                                                      CircularProgressIndicator(),
+                                                                );
+                                                              }
+                                                            }
+                                                          }),
+                                                      const SizedBox(
+                                                        height: 10,
+                                                      ),
+                                                    ],
+                                                  )),
+                                            ),
+                                          ],
                                         ),
-                                        Text(
-                                            style: TextStyle(fontSize: 35),
-                                            snapshot.data![0].description
-                                                .toString()),
-                                        Text(
-                                            style: TextStyle(
-                                                color: cuart, fontSize: 20),
-                                            'Temperatura Maxima: '),
-                                        Text(
-                                            style: TextStyle(fontSize: 20),
-                                            snapshot.data![0].temp_max
-                                                    .toString() +
-                                                'C°'),
-                                        Text(
-                                            style: TextStyle(
-                                                color: cuart, fontSize: 20),
-                                            'Temperatura Minima: '),
-                                        Text(
-                                            style: TextStyle(fontSize: 20),
-                                            snapshot.data![0].temp_min
-                                                    .toString() +
-                                                'C°'),
-                                        Text(
-                                            style: TextStyle(
-                                                color: cuart, fontSize: 20),
-                                            'Humedad: '),
-                                        Text(
-                                            style: TextStyle(fontSize: 20),
-                                            snapshot.data![0].humidity
-                                                .toString()),
-                                        Text(
-                                            style: TextStyle(
-                                                color: cuart, fontSize: 20),
-                                            'Sensacion termica: '),
-                                        Text(
-                                            style: TextStyle(fontSize: 20),
-                                            snapshot.data![0].feels_like
-                                                .toString()),
-                                        const SizedBox(
-                                          height: 10,
-                                        ),
-                                        FutureBuilder(
-                                            future: apiWeather!.getAllWeather(
-                                                lati!, longi!, DateTime.now()),
-                                            initialData: [],
-                                            builder: (context, snapshot) {
-                                              if (snapshot.hasData) {
-                                                return createWeatherList(
-                                                    context,
-                                                    snapshot,
-                                                    primar,
-                                                    secund); /*Container(
-                                                    height: 150,
-                                                    child: ListView.builder(
-                                                        itemCount: snapshot
-                                                            .data!.length,
-                                                        shrinkWrap: true,
-                                                        scrollDirection:
-                                                            Axis.horizontal,
-                                                        itemBuilder:
-                                                            (BuildContext
-                                                                    context,
-                                                                int index) {
-                                                          return WidgetWeatherDay(
-                                                              snapshot
-                                                                  .data![index],
-                                                              context);
-                                                        }));*/
-                                              } else {
-                                                if (snapshot.hasError) {
-                                                  return Center(
-                                                    child: Text('Error 3'),
-                                                  );
-                                                } else {
-                                                  return Center(
-                                                    child:
-                                                        CircularProgressIndicator(),
-                                                  );
-                                                }
-                                              }
-                                            })
-                                      ],
-                                    )),
-                              ),
-                            ],
-                          ),
-                        );
-                      } else {
-                        if (snapshot.hasError) {
-                          return Center(
-                            child: Text('Error 2'),
-                          );
-                        } else {
-                          return Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        }
+                                      );
+                                    } else {
+                                      if (snapshot.hasError) {
+                                        return Center(
+                                          child: Text('Error 2'),
+                                        );
+                                      } else {
+                                        return Center(
+                                          child: CircularProgressIndicator(),
+                                        );
+                                      }
+                                    }
+                                  });
+
+                              /*Text(snapshot.data!.latitude.toString() +
+                      ' ' +
+                      snapshot.data!.longitude.toString());*/
+                            } else {
+                              if (snapshot.hasError) {
+                                //setState(() {});
+                                return Center(
+                                  child: Text('Error 1'),
+                                );
+                              } else {
+                                return Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+                            }
+                          })
+
+                      /* TextButton(
+              onPressed: () async {
+                posi = await ubi.determinePosition();
+                print(posi.latitude.toString() + ' ' + posi.longitude.toString());
+              },
+              child: Text('hola')),*/
+                    ]),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: circularMenu,
+                ),
+              ])
+            : ListView(children: [
+                Center(child: Text('We need permissions')),
+                TextButton(
+                    onPressed: () async {
+                      bool temp = await ubi.determinePosition();
+                      if (temp) {
+                        setState(() {
+                          red = true;
+                        });
                       }
-                    });
-
-                /*Text(snapshot.data!.latitude.toString() +
-                    ' ' +
-                    snapshot.data!.longitude.toString());*/
-              } else {
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text('Error 1'),
-                  );
-                } else {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-              }
-            })
-
-        /* TextButton(
-            onPressed: () async {
-              posi = await ubi.determinePosition();
-              print(posi.latitude.toString() + ' ' + posi.longitude.toString());
-            },
-            child: Text('hola')),*/
-      ]),
-    );
+                    },
+                    child: Text('Conceder permiso'))
+              ]));
   }
 }

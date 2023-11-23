@@ -99,25 +99,25 @@ class ApiWeather {
         if (tum!.day == tim.day) {
           if (tum!.hour == 12) {
             if (band) {
-              print('Anadido ' + tum.toString() + ': ' + tempu.toString());
+              //print('Anadido ' + tum.toString() + ': ' + tempu.toString());
               buena.add(tempu);
               band = false;
             }
           } else if (tim!.hour == 12) {
-            print('Anadido' + tim.toString() + ': ' + two.toString());
+            // print('Anadido' + tim.toString() + ': ' + two.toString());
             buena.add(two);
             band = false;
           }
           if ((limit.day + 5) == tim.day) {
             if (band) {
               buena.add(two);
-              print('Anadido' + tim.toString() + ': ' + two.toString());
+              //print('Anadido' + tim.toString() + ': ' + two.toString());
               band = false;
             }
           }
         } else {
           if (band) {
-            print('Anadido ' + tum.toString() + ': ' + tempu.toString());
+            //print('Anadido ' + tum.toString() + ': ' + tempu.toString());
             buena.add(tempu);
             tempu = two;
             tum = tim;
@@ -130,6 +130,6 @@ class ApiWeather {
         }
       }
     }
-    print(buena.toString());
+    //print(buena.toString());
   }
 }
