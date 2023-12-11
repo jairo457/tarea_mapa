@@ -8,10 +8,13 @@ environment:
 
 dependencies:
   http: ^1.1.0
+  get: ^4.6.6
   intl: ^0.18.1
   gradients: ^0.1.1+2
+  sqflite: ^2.3.0
   geolocator: ^10.1.0
   url_launcher: ^6.2.1
+  interactive_maps_marker: ^0.0.2
   circular_menu: ^2.0.1
   google_maps_flutter: ^2.5.0
   path_provider: ^2.1.1
@@ -28,3 +31,4 @@ flutter:
   uses-material-design: true
   assets:
    - assets/
+   - assets/01d.png

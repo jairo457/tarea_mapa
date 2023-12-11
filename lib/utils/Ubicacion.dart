@@ -21,19 +21,18 @@ class Ubicacion {
     ));
   }
 
+  Future<Position> GetCurrentposition() {
+    return Geolocator.getCurrentPosition();
+  }
+
   determinePosition() async {
     bool serviceEnabled;
     LocationPermission permission;
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     permission = await Geolocator.checkPermission();
-
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return false;
-      } else {
-        return true;
-      }
+      return false;
     } else {
       return true;
     }
