@@ -39,9 +39,9 @@ class MasterDB {
     return conexion!.insert(tblName, data);
   }
 
-  Future<int> DELETE_Mark(String tblName, String id) async {
+  Future<int> DELETE_Mark(String tblName, int id) async {
     var conexion = await database;
-    return conexion!.delete(tblName, where: 'lat = ?', whereArgs: [id]);
+    return conexion!.delete(tblName, where: 'Id = ?', whereArgs: [id]);
   }
 
   Future<List<MarkModel>> GETALL_Mark() async {

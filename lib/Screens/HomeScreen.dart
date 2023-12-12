@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:circular_menu/circular_menu.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -47,16 +49,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void initState() {
     super.initState();
-    /*WidgetsBinding.instance.addPostFrameCallback((_) {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {});
-    });*/
+    });
     permisos();
     startLocation();
     //pregunta1();
   }
 
   permisos() async {
-    red.value = ubi.determinePosition();
+    red.value = await ubi.determinePosition();
+    if (red.value) {
+      startLocation();
+    }
   }
 
   void Coloreame(double tempo) {
@@ -98,29 +104,17 @@ class _HomeScreenState extends State<HomeScreen> {
         toggleButtonColor: Colors.amber,
         items: [
           CircularMenuItem(
+              color: Colors.red,
+              icon: Icons.logout,
+              onTap: () {
+                exit(0);
+                //callback
+              }),
+          CircularMenuItem(
+              color: Color.fromARGB(255, 145, 193, 255),
               icon: Icons.map,
               onTap: () {
                 Navigator.pushNamed(context, '/map');
-              }),
-          CircularMenuItem(
-              icon: Icons.search,
-              onTap: () {
-                //callback
-              }),
-          CircularMenuItem(
-              icon: Icons.settings,
-              onTap: () {
-                //callback
-              }),
-          CircularMenuItem(
-              icon: Icons.star,
-              onTap: () {
-                //callback
-              }),
-          CircularMenuItem(
-              icon: Icons.pages,
-              onTap: () {
-                //callback
               }),
         ]);
 
@@ -142,196 +136,188 @@ class _HomeScreenState extends State<HomeScreen> {
               }));
     }
 
-    return Obx(
-      () => Scaffold(
-          backgroundColor: Color.fromARGB(255, 183, 205, 224),
-          body: red.value
-              ? Stack(children: [
-                  ListView(
-                      controller: _controller,
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      children: [
-                        StreamBuilder(
-                            stream: _locStream.stream,
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData) {
-                                lati = snapshot.data!.latitude.toString();
-                                longi = snapshot.data!.longitude.toString();
-                                return FutureBuilder(
-                                    future: apiWeather!.getWeather(
-                                        snapshot.data!.latitude.toString(),
-                                        snapshot.data!.longitude.toString()),
-                                    builder: (context,
-                                        AsyncSnapshot<List<WeatherModel>?>
-                                            snapshot) {
-                                      if (snapshot.hasData) {
-                                        tempi = double.tryParse(
-                                            snapshot.data![0].temp.toString());
-                                        Coloreame(double.tryParse(snapshot
-                                            .data![0].temp
-                                            .toString())!);
-                                        return Center(
-                                          child: ListView(
-                                            shrinkWrap: true,
-                                            children: [
-                                              const SizedBox(
-                                                height: 30,
+    return Scaffold(
+        backgroundColor: Color.fromARGB(255, 183, 205, 224),
+        body: red.value
+            ? Stack(children: [
+                ListView(
+                    controller: _controller,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      StreamBuilder(
+                          stream: _locStream.stream,
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              lati = snapshot.data!.latitude.toString();
+                              longi = snapshot.data!.longitude.toString();
+                              return FutureBuilder(
+                                  future: apiWeather!.getWeather(
+                                      snapshot.data!.latitude.toString(),
+                                      snapshot.data!.longitude.toString()),
+                                  builder: (context,
+                                      AsyncSnapshot<List<WeatherModel>?>
+                                          snapshot) {
+                                    if (snapshot.hasData) {
+                                      tempi = double.tryParse(
+                                          snapshot.data![0].temp.toString());
+                                      Coloreame(double.tryParse(
+                                          snapshot.data![0].temp.toString())!);
+                                      return Center(
+                                        child: ListView(
+                                          shrinkWrap: true,
+                                          children: [
+                                            const SizedBox(
+                                              height: 30,
+                                            ),
+                                            Center(
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(15),
+                                                  gradient:
+                                                      LinearGradientPainter(
+                                                    colors: <Color>[
+                                                      secund,
+                                                      ter,
+                                                    ],
+                                                  ),
+                                                  // color:
+                                                  //   secund // Color.fromARGB(234, 249, 245, 245),
+                                                ),
+                                                padding: EdgeInsets.all(10.0),
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.center,
+                                                  children: [
+                                                    Row(
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          Icon(
+                                                            color: primar,
+                                                            Icons.thermostat,
+                                                            size: 80,
+                                                          ),
+                                                          Text(
+                                                              style: TextStyle(
+                                                                  fontSize: 40),
+                                                              snapshot.data![0]
+                                                                      .temp
+                                                                      .toString() +
+                                                                  ' C°'),
+                                                          //circularMenu,
+                                                        ])
+                                                  ],
+                                                ),
                                               ),
-                                              Center(
-                                                child: Container(
+                                            ),
+                                            const SizedBox(
+                                              height: 40,
+                                            ),
+                                            Center(
+                                              child: Container(
+                                                  padding: EdgeInsets.all(10.0),
                                                   decoration: BoxDecoration(
                                                     borderRadius:
                                                         BorderRadius.circular(
                                                             15),
-                                                    gradient:
-                                                        LinearGradientPainter(
-                                                      colors: <Color>[
-                                                        secund,
-                                                        ter,
-                                                      ],
-                                                    ),
-                                                    // color:
-                                                    //   secund // Color.fromARGB(234, 249, 245, 245),
+                                                    color: secund,
                                                   ),
-                                                  padding: EdgeInsets.all(10.0),
                                                   child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .center,
+                                                    mainAxisSize:
+                                                        MainAxisSize.max,
                                                     children: [
-                                                      Row(
-                                                          mainAxisSize:
-                                                              MainAxisSize.min,
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            Icon(
-                                                              color: primar,
-                                                              Icons.thermostat,
-                                                              size: 80,
-                                                            ),
-                                                            Text(
-                                                                style: TextStyle(
-                                                                    fontSize:
-                                                                        40),
-                                                                snapshot
+                                                      ColorFiltered(
+                                                        colorFilter:
+                                                            ColorFilter.mode(
+                                                                primar,
+                                                                BlendMode
+                                                                    .modulate),
+                                                        child: Image(
+                                                            image: AssetImage(
+                                                                'assets/' +
+                                                                    snapshot
                                                                         .data![
                                                                             0]
-                                                                        .temp
+                                                                        .icon
                                                                         .toString() +
-                                                                    ' C°'),
-                                                            //circularMenu,
-                                                          ])
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                              const SizedBox(
-                                                height: 40,
-                                              ),
-                                              Center(
-                                                child: Container(
-                                                    padding:
-                                                        EdgeInsets.all(10.0),
-                                                    decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              15),
-                                                      color: secund,
-                                                    ),
-                                                    child: Column(
-                                                      mainAxisSize:
-                                                          MainAxisSize.max,
-                                                      children: [
-                                                        ColorFiltered(
-                                                          colorFilter:
-                                                              ColorFilter.mode(
+                                                                    '.png')),
+                                                      ),
+                                                      Text(
+                                                          style: TextStyle(
+                                                              fontSize: 35),
+                                                          snapshot.data![0]
+                                                              .description
+                                                              .toString()),
+                                                      Text(
+                                                          style: TextStyle(
+                                                              color: cuart,
+                                                              fontSize: 20),
+                                                          'Temperatura Maxima: '),
+                                                      Text(
+                                                          style: TextStyle(
+                                                              fontSize: 20),
+                                                          snapshot.data![0]
+                                                                  .temp_max
+                                                                  .toString() +
+                                                              'C°'),
+                                                      Text(
+                                                          style: TextStyle(
+                                                              color: cuart,
+                                                              fontSize: 20),
+                                                          'Temperatura Minima: '),
+                                                      Text(
+                                                          style: TextStyle(
+                                                              fontSize: 20),
+                                                          snapshot.data![0]
+                                                                  .temp_min
+                                                                  .toString() +
+                                                              'C°'),
+                                                      Text(
+                                                          style: TextStyle(
+                                                              color: cuart,
+                                                              fontSize: 20),
+                                                          'Humedad: '),
+                                                      Text(
+                                                          style: TextStyle(
+                                                              fontSize: 20),
+                                                          snapshot
+                                                              .data![0].humidity
+                                                              .toString()),
+                                                      Text(
+                                                          style: TextStyle(
+                                                              color: cuart,
+                                                              fontSize: 20),
+                                                          'Sensacion termica: '),
+                                                      Text(
+                                                          style: TextStyle(
+                                                              fontSize: 20),
+                                                          snapshot.data![0]
+                                                              .feels_like
+                                                              .toString()),
+                                                      const SizedBox(
+                                                        height: 10,
+                                                      ),
+                                                      FutureBuilder(
+                                                          future: apiWeather!
+                                                              .getAllWeather(
+                                                                  lati!,
+                                                                  longi!,
+                                                                  DateTime
+                                                                      .now()),
+                                                          initialData: [],
+                                                          builder: (context,
+                                                              snapshot) {
+                                                            if (snapshot
+                                                                .hasData) {
+                                                              return createWeatherList(
+                                                                  context,
+                                                                  snapshot,
                                                                   primar,
-                                                                  BlendMode
-                                                                      .modulate),
-                                                          child: Image(
-                                                              image: AssetImage(
-                                                                  'assets/' +
-                                                                      snapshot
-                                                                          .data![
-                                                                              0]
-                                                                          .icon
-                                                                          .toString() +
-                                                                      '.png')),
-                                                        ),
-                                                        Text(
-                                                            style: TextStyle(
-                                                                fontSize: 35),
-                                                            snapshot.data![0]
-                                                                .description
-                                                                .toString()),
-                                                        Text(
-                                                            style: TextStyle(
-                                                                color: cuart,
-                                                                fontSize: 20),
-                                                            'Temperatura Maxima: '),
-                                                        Text(
-                                                            style: TextStyle(
-                                                                fontSize: 20),
-                                                            snapshot.data![0]
-                                                                    .temp_max
-                                                                    .toString() +
-                                                                'C°'),
-                                                        Text(
-                                                            style: TextStyle(
-                                                                color: cuart,
-                                                                fontSize: 20),
-                                                            'Temperatura Minima: '),
-                                                        Text(
-                                                            style: TextStyle(
-                                                                fontSize: 20),
-                                                            snapshot.data![0]
-                                                                    .temp_min
-                                                                    .toString() +
-                                                                'C°'),
-                                                        Text(
-                                                            style: TextStyle(
-                                                                color: cuart,
-                                                                fontSize: 20),
-                                                            'Humedad: '),
-                                                        Text(
-                                                            style: TextStyle(
-                                                                fontSize: 20),
-                                                            snapshot.data![0]
-                                                                .humidity
-                                                                .toString()),
-                                                        Text(
-                                                            style: TextStyle(
-                                                                color: cuart,
-                                                                fontSize: 20),
-                                                            'Sensacion termica: '),
-                                                        Text(
-                                                            style: TextStyle(
-                                                                fontSize: 20),
-                                                            snapshot.data![0]
-                                                                .feels_like
-                                                                .toString()),
-                                                        const SizedBox(
-                                                          height: 10,
-                                                        ),
-                                                        FutureBuilder(
-                                                            future: apiWeather!
-                                                                .getAllWeather(
-                                                                    lati!,
-                                                                    longi!,
-                                                                    DateTime
-                                                                        .now()),
-                                                            initialData: [],
-                                                            builder: (context,
-                                                                snapshot) {
-                                                              if (snapshot
-                                                                  .hasData) {
-                                                                return createWeatherList(
-                                                                    context,
-                                                                    snapshot,
-                                                                    primar,
-                                                                    secund); /*Container(
+                                                                  secund); /*Container(
                                                         height: 150,
                                                         child: ListView.builder(
                                                             itemCount: snapshot
@@ -348,86 +334,74 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                       .data![index],
                                                                   context);
                                                             }));*/
+                                                            } else {
+                                                              if (snapshot
+                                                                  .hasError) {
+                                                                return Center(
+                                                                  child: Text(
+                                                                      'Error 3'),
+                                                                );
                                                               } else {
-                                                                if (snapshot
-                                                                    .hasError) {
-                                                                  return Center(
-                                                                    child: Text(
-                                                                        'Error 3'),
-                                                                  );
-                                                                } else {
-                                                                  return Center(
-                                                                    child:
-                                                                        CircularProgressIndicator(),
-                                                                  );
-                                                                }
+                                                                return Center(
+                                                                  child:
+                                                                      CircularProgressIndicator(),
+                                                                );
                                                               }
-                                                            }),
-                                                        const SizedBox(
-                                                          height: 10,
-                                                        ),
-                                                      ],
-                                                    )),
-                                              ),
-                                            ],
-                                          ),
+                                                            }
+                                                          }),
+                                                      const SizedBox(
+                                                        height: 10,
+                                                      ),
+                                                    ],
+                                                  )),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    } else {
+                                      if (snapshot.hasError) {
+                                        return Center(
+                                          child: Text('Error 2'),
                                         );
                                       } else {
-                                        if (snapshot.hasError) {
-                                          return Center(
-                                            child: Text('Error 2'),
-                                          );
-                                        } else {
-                                          return Center(
-                                            child: CircularProgressIndicator(),
-                                          );
-                                        }
+                                        return Center(
+                                          child: CircularProgressIndicator(),
+                                        );
                                       }
-                                    });
-
-                                /*Text(snapshot.data!.latitude.toString() +
-                        ' ' +
-                        snapshot.data!.longitude.toString());*/
+                                    }
+                                  });
+                            } else {
+                              if (snapshot.hasError) {
+                                //setState(() {});
+                                return Center(
+                                  child: Text('Error 1'),
+                                );
                               } else {
-                                if (snapshot.hasError) {
-                                  //setState(() {});
-                                  return Center(
-                                    child: Text('Error 1'),
-                                  );
-                                } else {
-                                  return Center(
-                                    child: Text(
-                                        snapshot.connectionState.toString()),
-                                  );
-                                }
+                                return Center(
+                                  child:
+                                      Text(snapshot.connectionState.toString()),
+                                );
                               }
-                            })
-
-                        /* TextButton(
-                onPressed: () async {
-                  posi = await ubi.determinePosition();
-                  print(posi.latitude.toString() + ' ' + posi.longitude.toString());
-                },
-                child: Text('hola')),*/
-                      ]),
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: circularMenu,
-                  ),
-                ])
-              : ListView(children: [
-                  Center(child: Text('We need permissions')),
-                  TextButton(
-                      onPressed: () async {
-                        bool temp = await ubi.determinePosition();
-                        if (temp) {
-                          setState(() {
-                            red.value = true;
-                          });
-                        }
-                      },
-                      child: Text('Conceder permiso'))
-                ])),
-    );
+                            }
+                          })
+                    ]),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: circularMenu,
+                ),
+              ])
+            : ListView(children: [
+                Center(child: Text('We need permissions')),
+                TextButton(
+                    onPressed: () async {
+                      bool temp = await ubi.determinePosition();
+                      if (temp) {
+                        setState(() {
+                          red.value = true;
+                        });
+                      }
+                    },
+                    child: Text('Conceder permiso'))
+              ]));
   }
 }

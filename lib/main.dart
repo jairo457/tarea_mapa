@@ -11,14 +11,15 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: 'Tarea 5',
-      home: Home(),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: HomeScreen(),
+      routes: GetRoutes(),
     );
   }
 }
 
-class Home extends StatefulWidget {
+/*class Home extends StatefulWidget {
   const Home({super.key});
 
   @override
@@ -29,8 +30,9 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: HomeScreen(),
       routes: GetRoutes(),
     );
   }
-}
+}*/
